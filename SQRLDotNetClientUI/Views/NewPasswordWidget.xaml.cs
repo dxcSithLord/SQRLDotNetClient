@@ -52,7 +52,7 @@ namespace SQRLDotNetClientUI.Views
         /// </summary>
         public bool PasswordsMatch
         {
-            get { return this.GetValue(PasswordsMatchProperty); }
+            get { return (bool) this.GetValue(PasswordsMatchProperty); }
             set { this.SetValue(PasswordsMatchProperty, value); }
         }
 
@@ -61,7 +61,7 @@ namespace SQRLDotNetClientUI.Views
         /// </summary>
         public string NewPassword
         {
-            get { return this.GetValue(NewPasswordProperty); }
+            get { return (string) this.GetValue(NewPasswordProperty); }
             set { this.SetValue(NewPasswordProperty, value); }
         }
 
@@ -70,7 +70,7 @@ namespace SQRLDotNetClientUI.Views
         /// </summary>
         public string NewPasswordVerification
         {
-            get { return this.GetValue(NewPasswordVerificationProperty); }
+            get { return (string) this.GetValue(NewPasswordVerificationProperty); }
             set { this.SetValue(NewPasswordVerificationProperty, value); }
         }
 
