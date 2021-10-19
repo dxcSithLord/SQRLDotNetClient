@@ -1,15 +1,17 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Avalonia;
-using Avalonia.Logging.Serilog;
+/*    using Avalonia.Logging;
+.Serilog; */
 using Avalonia.ReactiveUI;
 using SQRLDotNetClientUI.IPC;
 using Serilog;
 using System.IO;
 using System.Reflection;
-using SQRLDotNetClientUI.Views;
+/* using SQRLDotNetClientUI.Views; */
 using Avalonia.Dialogs;
 using SQRLDotNetClientUI.DB.DBContext;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +20,7 @@ using SQRLCommon.Models;
 
 namespace SQRLDotNetClientUI
 {
-    class Program
+    internal static class Program
     {
         // Initialization code. Don't use any Avalonia, third-party APIs or any
         // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
@@ -26,7 +28,7 @@ namespace SQRLDotNetClientUI
         public static void Main(string[] args)
         {
             const string mutexId = @"Global\{{83cfa3fa-72bd-4903-9b9d-ba90f7f6ba7f}}";
-            Thread ipcThread = new Thread(StartIPCServer);
+            Thread ipcThread = new Thread(StartIpcServer);
 
             // Set up logging
             if (!Directory.Exists(PathConf.LogPath)) Directory.CreateDirectory(PathConf.LogPath);
@@ -41,10 +43,12 @@ namespace SQRLDotNetClientUI
                 RuntimeInformation.OSDescription);
 
             var version = Assembly.GetExecutingAssembly().GetName().Version;
-            Log.Information($"Client version: {version.ToString()}");
+            Debug.Assert(version != null, nameof(version) + " != null");
+            Log.Information($"Client version: {version}");
 
             // Try to detect an existing instance of our app
-            using (var mutex = new Mutex(false, mutexId, out bool created))
+            // Removed created out variable as not used
+            using (var mutex = new Mutex(false, mutexId))
             {
                 bool hasHandle = false;
                 try
@@ -67,12 +71,13 @@ namespace SQRLDotNetClientUI
                     }
 
                     // Adds event to handle abrupt program exits and mitigate CPS
-                    AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
+                    // Removed redundant event handler 
+                    AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
                     // Perform database migrations
-                    var _db = SQRLDBContext.Instance;
+                    var db = SQRLDBContext.Instance;
                    
-                    _db.Database.Migrate();
+                    db.Database.Migrate();
                     
 
                     // No existing instance of the app running,
@@ -88,7 +93,7 @@ namespace SQRLDotNetClientUI
                     }
 
                     //Remove the notify icon
-                    (App.Current as App).NotifyIcon?.Remove();
+                    ((App) Application.Current).NotifyIcon?.Remove();
 
                     if (ipcThread.IsAlive)
                     {
@@ -108,7 +113,7 @@ namespace SQRLDotNetClientUI
         {
             // One of the last ditch efforts at gracefully handling CPS, note there may be no 
             // localization here we are at this point throwing a hail mary
-            HandleAbruptCPS();
+            HandleAbruptCps();
 
             Log.Information("Client shutting down\r\n\r\n");
         }
@@ -116,17 +121,17 @@ namespace SQRLDotNetClientUI
         /// <summary>
         /// Handles pending CPS requests to end CPS gracefully.
         /// </summary>
-        private static void HandleAbruptCPS()
+        private static void HandleAbruptCps()
         {
             try
             {
                 Log.Information("Attempting to end CPS gracefully");
-                var _loc = (App.Current as App)?.Localization;
-                if (_loc != null)
+                var loc = (Application.Current as App)?.Localization;
+                if (loc != null)
                 {
-                    SQRLCPSServer.HandlePendingCPS(_loc.GetLocalizationValue("CPSAbortHeader"),
-                                                   _loc.GetLocalizationValue("CPSAbortMessage"),
-                                                   _loc.GetLocalizationValue("CPSAbortLinkText"));
+                    SQRLCPSServer.HandlePendingCPS(loc.GetLocalizationValue("CPSAbortHeader"),
+                                                   loc.GetLocalizationValue("CPSAbortMessage"),
+                                                   loc.GetLocalizationValue("CPSAbortLinkText"));
                 }
                 else
                     SQRLCPSServer.HandlePendingCPS();
@@ -142,18 +147,19 @@ namespace SQRLDotNetClientUI
         /// Starts the IPC server and also starts listening for incoming IPC queries.
         /// </summary>
         /// <param name="obj">Not used.</param>
-        private static void StartIPCServer(object obj)
+        private static void StartIpcServer(object obj)
         {
+            // ReSharper disable once RedundantArgumentDefaultValue
             IPCServer nps = new IPCServer("127.0.0.1", 13000);
             nps.StartListening();
         }
 
         /// <summary>
-        /// Forwards the given string to the existing app instance by estblishing
+        /// Forwards the given string to the existing app instance by establishing
         /// a TCP connection to the existing instance's IPC server and sending the
         /// given data over that connection.
         /// </summary>
-        /// <param name="url">The data to send to the exisnting app instance.</param>
+        /// <param name="url">The data to send to the existing app instance.</param>
         private static void ForwardToExistingInstance(string url)
         {
             try
@@ -182,7 +188,7 @@ namespace SQRLDotNetClientUI
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
                 .With(new AvaloniaNativePlatformOptions { UseGpu = !RuntimeInformation.IsOSPlatform(OSPlatform.OSX) })
-                .LogToDebug()
+                .LogToTrace()
                 .UseReactiveUI()
                 .UseManagedSystemDialogs(); //It is recommended by Avalonia Developers that we use Managed System Dialogs instead  of the native ones particularly for Linux
     }
