@@ -4,8 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
              xmlns:behaviors="clr-namespace:SQRLDotNetClientUI.Behaviors;assembly=SQRLDotNetClientUI"
-             xmlns:vm="clr-namespace:SQRLDotNetClientUI.ViewModels;assembly=SQRLDotNetClientUI"
-             xmlns:util="clr-namespace:SQRLDotNetClientUI.ViewModels.AuthenticationViewModel;assembly=SQRLDotNetClientUI"
              xmlns:loc="clr-namespace:SQRLCommon.AvaloniaExtensions;assembly=SQRLCommon"
              mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="500"
              x:Class="SQRLDotNetClientUI.Views.AuthenticationView">
@@ -16,20 +14,20 @@
     <!-- Header image -->
     
     <TextBlock IsVisible="{Binding NewUpdateAvailable}" HorizontalAlignment="Center" Foreground="Red" FontWeight="Bold"  Margin="10" Text="{loc:Localization NewUpdateAvailableRunApp}" TextWrapping="Wrap" Width="370" DockPanel.Dock="Top" />
-    <Image Source="resm:SQRLDotNetClientUI.Assets.sqrl_icon_normal_48_icon.ico" Margin="10" Height="50" DockPanel.Dock="Top" HorizontalAlignment="Center"></Image>
-    
+    <Image Source="resm:SQRLDotNetClientUI.Assets.sqrl_icon_normal_48_icon.ico" Margin="10" Height="50" DockPanel.Dock="Top" HorizontalAlignment="Center" />
+
     <!-- Login message and site id -->
       <TextBlock HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="10, 0, 10, 5" Text="{loc:Localization AuthMessage}" FontSize="13" TextWrapping="Wrap" />
       <TextBlock HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="10, 0, 10, 0" Text="{Binding SiteID}" FontSize="22" FontFamily="Consolas" Foreground="#007cc3" TextWrapping="Wrap"/>
 
     <!-- "Identity button/label -->
     <StackPanel IsVisible="{Binding ShowIdentitySelector}" Orientation="Horizontal" DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="5,5,5,0">
-      <Button Name="btnIdentitySelector" Command="{Binding SwitchIdentity}" IsVisible="{Binding SwitchIdentity}" Margin="0,5,0,0" BorderBrush="Transparent">
+      <Button Name="BtnIdentitySelector" Command="{Binding SwitchIdentity}" IsVisible="{Binding SwitchIdentity}" Margin="0,5,0,0" BorderBrush="Transparent">
         <Button.Template>
           <ControlTemplate>
             <StackPanel Orientation="Horizontal">
               <TextBlock Text="{loc:Localization WithIdentityLabel}" Margin="0,0,3,0" />
-              <TextBlock Text="{Binding IdentityName}" Foreground="Blue">Identity Name</TextBlock>
+              <TextBlock Text="{Binding IdentityName, StringFormat='Identity Name'}" Foreground="Blue"></TextBlock>
             </StackPanel>
           </ControlTemplate>
         </Button.Template>
@@ -38,8 +36,8 @@
 
     <!-- Password/QuickPass form -->
     <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="20,20,10,10">
-      <TextBlock Text="{Binding PasswordLabel}" Width="100" VerticalAlignment="Center" FontSize="14" TextWrapping="Wrap">Password</TextBlock>
-      <loc:CopyPasteTextBox Name="txtPassword" Text="{Binding Password, Mode=TwoWay}" IsEnabled="{Binding !IsBusy}" PasswordChar="*" Width="230" Height="30">
+      <TextBlock Text="{Binding PasswordLabel, StringFormat='Password'}" Width="100" VerticalAlignment="Center" FontSize="14" TextWrapping="Wrap"></TextBlock>
+      <loc:CopyPasteTextBox Name="TxtPassword" Text="{Binding Password, Mode=TwoWay}" IsEnabled="{Binding !IsBusy}" PasswordChar="*" Width="230" Height="30">
         <i:Interaction.Behaviors>
           <behaviors:FocusOnAttached />
         </i:Interaction.Behaviors>
@@ -47,7 +45,7 @@
     </StackPanel>
 
     <!-- "Show advanced functions" button/label -->
-    <Button Name="btnAdvancedFunctions" Command="{Binding ShowAdvancedFunctions}" IsVisible="{Binding !AdvancedFunctionsVisible}" 
+    <Button Name="BtnAdvancedFunctions" Command="{Binding ShowAdvancedFunctions}" IsVisible="{Binding !AdvancedFunctionsVisible}" 
             IsEnabled="{Binding !IsBusy}" DockPanel.Dock="Top" HorizontalAlignment="Center" BorderBrush="Transparent">
       <Button.Template>
         <ControlTemplate>
@@ -62,19 +60,19 @@
       <!-- Alt-ID -->  
       <StackPanel Orientation="Horizontal" Margin="20,0,20,0">
         <TextBlock Text="{loc:Localization AltIDLabel}" Width="100" VerticalAlignment="Center" FontSize="14" TextWrapping="Wrap"/>
-        <loc:CopyPasteTextBox Name="txtAltID" Text="{Binding AltID}" IsEnabled="{Binding !IsBusy}" HorizontalAlignment="Left" Width="230" Height="30"/>
+        <loc:CopyPasteTextBox Name="TxtAltId" Text="{Binding AltID}" IsEnabled="{Binding !IsBusy}" HorizontalAlignment="Left" Width="230" Height="30"/>
       </StackPanel>
 
       <!-- Enable/Disable/Remove radio buttons -->
       <StackPanel Margin="120,15,20,0">
         <StackPanel.Resources>
-          <loc:EnumBooleanConverter x:Key="enumBooleanConverter" />
+          <loc:EnumBooleanConverter x:Key="EnumBooleanConverter" />
         </StackPanel.Resources>
-        <RadioButton Content="{loc:Localization LoginRadioButtonText}" IsChecked="{Binding Path=Action, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Login}" 
+        <RadioButton Content="{loc:Localization LoginRadioButtonText}" IsChecked="{Binding Path=Action, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=Login}" 
                      IsEnabled="{Binding !IsBusy}" Margin="0,0,0,2" />
-        <RadioButton Content="{loc:Localization DisableRadioButtonText}" IsChecked="{Binding Path=Action, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Disable}" 
+        <RadioButton Content="{loc:Localization DisableRadioButtonText}" IsChecked="{Binding Path=Action, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=Disable}" 
                      IsEnabled="{Binding !IsBusy}" Margin="0,2,0,2" />
-        <RadioButton Content="{loc:Localization RemoveRadioButtonText}" IsChecked="{Binding Path=Action, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Remove}" 
+        <RadioButton Content="{loc:Localization RemoveRadioButtonText}" IsChecked="{Binding Path=Action, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=Remove}" 
                      IsEnabled="{Binding !IsBusy}" Margin="0,2,0,2" />
         <!--<RadioButton  IsChecked="{Binding Path=Action, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Remove}"  Margin="110,2,2,2">Remove</RadioButton>-->
       </StackPanel>
