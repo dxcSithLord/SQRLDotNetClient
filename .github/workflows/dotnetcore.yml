@@ -8,12 +8,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1.4.0
+    - uses: actions/checkout@v4
+    - uses: actions/setup-dotnet@v4
       with:
         # SDK version to use. Example: 2.2.104
-        dotnet-version: 3.1.100 # optional
+        dotnet-version: 6 # optional
     - name: Build with dotnet
       run: dotnet build --configuration Release
     - name: Test with dotnet
