@@ -62,7 +62,7 @@ on:
         required: false
   workflow_dispatch:
   pull_request_target:
-    branches: [ "master" ]
+    branches: ["master", "dxcSithLord-patch-1-1" ]
     types: [ assigned, opened, synchronize, reopened, labeled, edited ]
 
 permissions:
@@ -74,11 +74,12 @@ jobs:
       contents: read            # for actions/checkout to fetch code
       security-events: write    # for redhat-actions/crda to upload SARIF results
     name: Scan project vulnerabilities with CRDA
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       # sha for version 4.2.2
+      
       # Setup the required tool stack for your language below (uncomment/setup for your project)
       # - name: Setup Node.js
       #   uses: actions/setup-node@<setup-node-SHA>
@@ -89,7 +90,6 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '20'  # Specify the Node.js version your project uses
-
 
       - name: Install CRDA CLI
         uses: redhat-actions/openshift-tools-installer@144527c7d98999f2652264c048c7a9bd103f8a82
@@ -102,6 +102,6 @@ jobs:
         id: scan
         uses: redhat-actions/crda@6310ee94a6ac8f76b4152b7267c6cd7f1277052c
         with:
-          crda_key: ${{ secrets.CRDA_KEY }}
-          # snyk_token: ${{ secrets.SNYK_TOKEN }}
+          # crda_key: ${{ secrets.CRDA_KEY }}
+          snyk_token: ${{ secrets.SNYK_TOKEN }}
           # upload_artifact: false
