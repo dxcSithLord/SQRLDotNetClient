@@ -114,7 +114,7 @@ jobs:
 
       - name: CRDA Scan
         id: scan
-        uses: redhat-actions/crda@v2
+        uses: redhat-actions/crda@v1.3
         with:
           # crda_key: ${{ secrets.CRDA_KEY }}
           snyk_token: ${{ secrets.SNYK_TOKEN }}
