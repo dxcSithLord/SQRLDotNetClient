@@ -62,23 +62,41 @@ on:
         required: false
   workflow_dispatch:
   pull_request_target:
-    branches: [ "master" ]
+    branches: ["master", "dxcSithLord-patch-1-1" ]
     types: [ assigned, opened, synchronize, reopened, labeled, edited ]
 
 permissions:
   contents: read
 
 jobs:
+  discover-csprojs:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: set-matrix
+        run: |
+          files=$(find . -name '*.csproj' | jq -R -s -c 'split("\n")[:-1]')
+          echo "matrix={\"csproj\":$files}" >> $GITHUB_OUTPUT
+
   crda-scan:
     permissions:
       contents: read            # for actions/checkout to fetch code
       security-events: write    # for redhat-actions/crda to upload SARIF results
     name: Scan project vulnerabilities with CRDA
-    runs-on: ubuntu-24.04
+    needs: discover-csprojs
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.discover-csprojs.outputs.matrix) }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@v4
       # sha for version 4.2.2
+
+      - name: Restore .NET dependencies
+        run: dotnet restore ${{ matrix.csproj }}
+      
       # Setup the required tool stack for your language below (uncomment/setup for your project)
       # - name: Setup Node.js
       #   uses: actions/setup-node@<setup-node-SHA>
@@ -86,22 +104,32 @@ jobs:
       #     node-version: '14'
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        uses: actions/setup-node@v4
         with:
           node-version: '20'  # Specify the Node.js version your project uses
 
-
+      - name: Cache CRDA CLI
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/work/_temp/openshift-bin
+          key: crda-cli-${{ runner.os }}-v0.2.5
+          restore-keys: |
+            crda-cli-${{ runner.os }}-
+  
       - name: Install CRDA CLI
-        uses: redhat-actions/openshift-tools-installer@144527c7d98999f2652264c048c7a9bd103f8a82
+        uses: redhat-actions/openshift-tools-installer@v1
         with:
           source: github
           github_pat: ${{ github.token }}
           crda: "latest"
 
+
       - name: CRDA Scan
         id: scan
-        uses: redhat-actions/crda@6310ee94a6ac8f76b4152b7267c6cd7f1277052c
+        uses: redhat-actions/crda@v1.3
         with:
-          crda_key: ${{ secrets.CRDA_KEY }}
-          # snyk_token: ${{ secrets.SNYK_TOKEN }}
-          # upload_artifact: false
+          # crda_key: ${{ secrets.CRDA_KEY }}
+          snyk_token: ${{ secrets.SNYK_TOKEN }}
+          manifest_file: ${{ matrix.csproj }}
+        env:
+          CRDA_LANGUAGE: dotnet
