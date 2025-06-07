@@ -54,9 +54,6 @@ on:
 
 # Hardened CRDA Scan Workflow
 
-name: CRDA Scan
-
-on:
   workflow_call:
     secrets:
       CRDA_KEY:
