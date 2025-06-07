@@ -93,6 +93,9 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
       # sha for version 4.2.2
+
+      - name: Restore .NET dependencies
+        run: dotnet restore ${{ matrix.csproj }}
       
       # Setup the required tool stack for your language below (uncomment/setup for your project)
       # - name: Setup Node.js
@@ -120,3 +123,5 @@ jobs:
           snyk_token: ${{ secrets.SNYK_TOKEN }}
           manifest_file: ${{ matrix.csproj }}
           # upload_artifact: false
+        env:
+          CRDA_LANGUAGE: dotnet
