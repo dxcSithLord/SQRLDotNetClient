@@ -1,20 +1,29 @@
-name: Build & Test
+name: .NET Core Build and Test
 
-on: [push, pull_request]
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: [ '6.0.x', '7.0.x', '8.0.x' ] # test against multiple .NET versions
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v1.4.0
-      with:
-        # SDK version to use. Example: 2.2.104
-        dotnet-version: 3.1.100 # optional
-    - name: Build with dotnet
-      run: dotnet build --configuration Release
-    - name: Test with dotnet
-      run: dotnet test
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+
+      - name: Test with dotnet
+        run: dotnet test --configuration Release
