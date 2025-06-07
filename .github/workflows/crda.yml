@@ -108,12 +108,21 @@ jobs:
         with:
           node-version: '20'  # Specify the Node.js version your project uses
 
+      - name: Cache CRDA CLI
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/work/_temp/openshift-bin
+          key: crda-cli-${{ runner.os }}-v0.2.5
+          restore-keys: |
+            crda-cli-${{ runner.os }}-
+  
       - name: Install CRDA CLI
         uses: redhat-actions/openshift-tools-installer@v1
         with:
           source: github
           github_pat: ${{ github.token }}
           crda: "latest"
+
 
       - name: CRDA Scan
         id: scan
@@ -122,6 +131,5 @@ jobs:
           # crda_key: ${{ secrets.CRDA_KEY }}
           snyk_token: ${{ secrets.SNYK_TOKEN }}
           manifest_file: ${{ matrix.csproj }}
-          # upload_artifact: false
         env:
           CRDA_LANGUAGE: dotnet
