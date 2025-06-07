@@ -46,7 +46,7 @@ namespace SQRLPlatformAwareInstaller
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
                 .With(new AvaloniaNativePlatformOptions { UseGpu = !RuntimeInformation.IsOSPlatform(OSPlatform.OSX) })
-                .LogToDebug()
+                .LogToTrace()
                 .UseReactiveUI()
                 // It is recommended by Avalonia Developers that we use Managed System Dialogs 
                 // instead  of the native ones particularly for Linux
