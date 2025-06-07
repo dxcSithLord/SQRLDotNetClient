@@ -85,6 +85,12 @@ jobs:
       #   with:
       #     node-version: '14'
 
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '20'  # Specify the Node.js version your project uses
+
+
       - name: Install CRDA CLI
         uses: redhat-actions/openshift-tools-installer@144527c7d98999f2652264c048c7a9bd103f8a82
         with:
